@@ -1,3 +1,6 @@
+/* Extra-bold sans weights for the landing hero title (must stay at top) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@700;800&display=swap');
+
 /* ------------------------------------------------------------------ */
 /* Variables                                                           */
 /* ------------------------------------------------------------------ */
@@ -612,4 +615,280 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 600px) {
     .nav-links a:not(.nav-cta) { display: none; }
     .hero { padding: 3rem 1rem 2rem; }
+}
+
+/* ================================================================== */
+/* Landing hero (merged from landing.css)                              */
+/* ================================================================== */
+
+:root {
+    --lp-green: #16a34a;
+    --lp-green-soft: #e6f6ec;
+    --lp-red: #e5484d;
+    --lp-ink: #0f1115;
+    --lp-gray: #667085;
+    --lp-frame: #f4f4f5;
+    --lp-track: #ececec;
+    --lp-line: #ededed;
+}
+
+.lp-hero {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 4.5rem 1.5rem 4rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Badge -------------------------------------------------------------- */
+
+.lp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--lp-green-soft);
+    color: var(--lp-ink);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 2rem;
+}
+
+.lp-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--lp-green);
+}
+
+/* Title -------------------------------------------------------------- */
+
+.lp-title {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6.2vw, 4.25rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--lp-ink);
+    margin-bottom: 1.5rem;
+}
+
+.lp-title-accent {
+    color: var(--lp-green);
+}
+
+/* Subtitle ----------------------------------------------------------- */
+
+.lp-subtitle {
+    max-width: 600px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--lp-gray);
+    margin-bottom: 2.5rem;
+}
+
+/* Actions ------------------------------------------------------------ */
+
+.lp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 4rem;
+}
+
+.lp-btn {
+    display: inline-block;
+    background: var(--lp-ink);
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.95rem 1.75rem;
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.lp-btn:hover {
+    background: #000000;
+    transform: translateY(-1px);
+}
+
+/* Browser mock ------------------------------------------------------- */
+
+.lp-mock {
+    width: 100%;
+    max-width: 900px;
+    background: var(--lp-frame);
+    border: 1px solid var(--lp-track);
+    border-radius: 16px;
+    padding: 1rem;
+    text-align: left;
+    box-shadow: 0 20px 50px rgba(15, 17, 21, 0.06);
+}
+
+.lp-mock-chrome {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem 1rem;
+}
+
+.lp-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+.lp-dot-red { background: #ff5f57; }
+.lp-dot-yellow { background: #febc2e; }
+.lp-dot-green { background: #28c840; }
+
+/* Stat tiles --------------------------------------------------------- */
+
+.lp-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.lp-stat {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid var(--lp-line);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+}
+
+.lp-stat-label {
+    font-size: 0.85rem;
+    color: var(--lp-gray);
+    margin-bottom: 0.5rem;
+}
+
+.lp-stat-value {
+    font-family: var(--font-body);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--lp-ink);
+    line-height: 1.1;
+    margin-bottom: 0.4rem;
+}
+
+.lp-stat-delta {
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.lp-delta-up { color: var(--lp-red); }
+.lp-delta-good { color: var(--lp-green); }
+.lp-stat-sub { color: var(--lp-gray); font-weight: 400; }
+
+/* Category bars ------------------------------------------------------ */
+
+.lp-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    background: #ffffff;
+    border: 1px solid var(--lp-line);
+    border-radius: 12px;
+    padding: 1.35rem 1.5rem;
+}
+
+.lp-bar-row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lp-bar-cat {
+    font-size: 0.88rem;
+    color: var(--lp-gray);
+}
+
+.lp-bar-track {
+    height: 9px;
+    background: var(--lp-track);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.lp-bar {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.lp-bar-food { background: #f59e0b; }
+.lp-bar-travel { background: #3b82f6; }
+.lp-bar-bills { background: #8b5cf6; }
+
+@media (max-width: 640px) {
+    .lp-hero { padding: 3rem 1rem 2.5rem; }
+    .lp-stats { grid-template-columns: 1fr; }
+    .lp-btn { width: 100%; text-align: center; }
+}
+
+/* ------------------------------------------------------------------ */
+/* "See how it works" video modal (merged from landing.html)           */
+/* ------------------------------------------------------------------ */
+
+.lp-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(15, 17, 21, 0.78);
+}
+.lp-modal.is-open { display: flex; }
+
+.lp-modal-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 880px;
+}
+
+.lp-modal-close {
+    position: absolute;
+    top: -2.75rem;
+    right: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.lp-modal-close:hover { color: #d1d5db; }
+
+.lp-modal-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;   /* 16:9 */
+    background: #000000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+.lp-modal-video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
 }

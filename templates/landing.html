@@ -2,66 +2,6 @@
 
 {% block title %}Spendly — Track Every Rupee{% endblock %}
 
-{% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
-<style>
-    /* "See how it works" video modal */
-    .lp-modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-        background: rgba(15, 17, 21, 0.78);
-    }
-    .lp-modal.is-open { display: flex; }
-
-    .lp-modal-dialog {
-        position: relative;
-        width: 100%;
-        max-width: 880px;
-    }
-
-    .lp-modal-close {
-        position: absolute;
-        top: -2.75rem;
-        right: 0;
-        width: 2.25rem;
-        height: 2.25rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: none;
-        color: #ffffff;
-        font-size: 2rem;
-        line-height: 1;
-        cursor: pointer;
-    }
-    .lp-modal-close:hover { color: #d1d5db; }
-
-    .lp-modal-video {
-        position: relative;
-        width: 100%;
-        height: 0;
-        padding-bottom: 56.25%;   /* 16:9 */
-        background: #000000;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
-    }
-    .lp-modal-video iframe {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        border: 0;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
 <section class="lp-hero">
