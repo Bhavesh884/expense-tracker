@@ -1050,3 +1050,262 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
     .skeleton { animation: none; }
 }
+
+/* ================================================================== */
+/* Profile page                                                        */
+/* ================================================================== */
+
+:root {
+    --cat-food: #c17f24;
+    --cat-transport: #3b82f6;
+    --cat-bills: #8b5cf6;
+    --cat-health: #16a34a;
+    --cat-entertainment: #e5484d;
+    --cat-shopping: #db2777;
+    --cat-other: #667085;
+}
+
+.profile {
+    padding: 3rem 2rem 4rem;
+}
+
+.profile-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Shared card shell (mirrors .feature-card / .auth-card) */
+.profile-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.04);
+}
+
+.profile-section-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+}
+
+/* 1. User info card ------------------------------------------------- */
+
+.profile-user {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.profile-avatar {
+    flex-shrink: 0;
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
+}
+
+.profile-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+}
+
+.profile-email {
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+}
+
+.profile-since {
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    margin-top: 0.35rem;
+}
+
+/* 2. Summary stats row (mirrors .lp-stats / .lp-stat) --------------- */
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.profile-stat {
+    display: flex;
+    flex-direction: column;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+}
+
+.profile-stat-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+}
+
+.profile-stat-value {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--ink);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 3. Transaction table --------------------------------------------- */
+
+.profile-table-wrap {
+    overflow-x: auto;
+}
+
+.profile-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.profile-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    padding: 0 0.75rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-table td {
+    padding: 0.85rem 0.75rem;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--ink-soft);
+    vertical-align: middle;
+}
+
+.profile-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.profile-table tbody tr {
+    transition: background 0.15s;
+}
+
+.profile-table tbody tr:hover {
+    background: var(--paper-warm);
+}
+
+.profile-date {
+    color: var(--ink-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.profile-amount {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+/* Category badges + dots ------------------------------------------- */
+
+.cat-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    color: var(--paper-card);
+    white-space: nowrap;
+}
+
+.cat-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: baseline;
+}
+
+.cat-food { background: var(--cat-food); }
+.cat-transport { background: var(--cat-transport); }
+.cat-bills { background: var(--cat-bills); }
+.cat-health { background: var(--cat-health); }
+.cat-entertainment { background: var(--cat-entertainment); }
+.cat-shopping { background: var(--cat-shopping); }
+.cat-other { background: var(--cat-other); }
+
+/* 4. Category breakdown (mirrors .mock-bar-row) -------------------- */
+
+.profile-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.profile-bar-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 80px;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-bar-cat {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+}
+
+.profile-bar-track {
+    height: 9px;
+    background: var(--border-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.profile-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+/* Static widths for the UI-first step; replaced by real values later. */
+.profile-bar-fill--w1 { width: 100%; }
+.profile-bar-fill--w2 { width: 67%; }
+.profile-bar-fill--w3 { width: 44%; }
+.profile-bar-fill--w4 { width: 39%; }
+.profile-bar-fill--w5 { width: 33%; }
+
+.profile-bar-amt {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Responsive ------------------------------------------------------- */
+
+@media (max-width: 768px) {
+    .profile { padding: 2rem 1rem 3rem; }
+    .profile-stats { grid-template-columns: 1fr; }
+    .profile-bar-row { grid-template-columns: 90px 1fr 70px; gap: 0.75rem; }
+}
