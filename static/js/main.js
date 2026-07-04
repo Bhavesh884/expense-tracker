@@ -2,6 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     initLoader();
+    initPasswordToggles();
     initPasswordUX();
 });
 
@@ -103,8 +104,30 @@ function initLoader() {
 
 
 // ------------------------------------------------------------------ //
-// Registration: password toggles, live strength/match outlines,       //
-// and submit gating. Progressive enhancement over server validation.  //
+// Password show/hide toggles. Global — wires every .password-toggle    //
+// button on any page (login, register, …) as progressive enhancement.  //
+// ------------------------------------------------------------------ //
+function initPasswordToggles() {
+    var toggles = document.querySelectorAll(".password-toggle");
+    toggles.forEach(function (toggle) {
+        toggle.addEventListener("click", function () {
+            var input = toggle.parentNode.querySelector(".form-input");
+            if (!input) {
+                return;
+            }
+            var reveal = input.type === "password";
+            input.type = reveal ? "text" : "password";
+            toggle.classList.toggle("is-on", reveal);
+            toggle.setAttribute("aria-pressed", reveal ? "true" : "false");
+            toggle.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+        });
+    });
+}
+
+
+// ------------------------------------------------------------------ //
+// Registration: live strength/match outlines and submit gating.       //
+// Progressive enhancement over server validation.                     //
 // ------------------------------------------------------------------ //
 function initPasswordUX() {
     var form = document.getElementById("register-form");
@@ -162,22 +185,6 @@ function initPasswordUX() {
 
     password.addEventListener("input", update);
     confirm.addEventListener("input", update);
-
-    // Wire the show/hide toggles (works for any .password-toggle).
-    var toggles = document.querySelectorAll(".password-toggle");
-    toggles.forEach(function (toggle) {
-        toggle.addEventListener("click", function () {
-            var input = toggle.parentNode.querySelector(".form-input");
-            if (!input) {
-                return;
-            }
-            var reveal = input.type === "password";
-            input.type = reveal ? "text" : "password";
-            toggle.classList.toggle("is-on", reveal);
-            toggle.setAttribute("aria-pressed", reveal ? "true" : "false");
-            toggle.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
-        });
-    });
 
     // Start disabled until the user enters a strong, matching password.
     update();
