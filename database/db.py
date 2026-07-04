@@ -49,6 +49,7 @@ def init_db():
 
 def get_user_by_email(email):
     """Return the user row matching the email, or None if it does not exist."""
+    email = (email or "").strip().lower()
     conn = get_db()
     user = conn.execute(
         "SELECT * FROM users WHERE email = ?", (email,)
@@ -59,6 +60,7 @@ def get_user_by_email(email):
 
 def create_user(name, email, password_hash):
     """Insert a new user and return the generated id."""
+    email = (email or "").strip().lower()
     conn = get_db()
     cursor = conn.execute(
         "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
