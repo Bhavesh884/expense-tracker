@@ -12,6 +12,56 @@
 </head>
 <body>
 
+    <!-- Global loading screen: branded overlay + page-shaped shimmer skeleton -->
+    <div class="app-loader" id="app-loader" data-variant="default"
+         aria-hidden="true" role="status" aria-live="polite">
+        <div class="app-loader-brand">
+            <span class="brand-icon">◈</span>
+            <span class="brand-name">Spendly</span>
+        </div>
+
+        <div class="skeleton-view sk-default">
+            <div class="skeleton skeleton-bar"></div>
+            <div class="skeleton skeleton-bar short"></div>
+        </div>
+
+        <div class="skeleton-view sk-auth">
+            <div class="skeleton-card-lg">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton skeleton-input"></div>
+                <div class="skeleton skeleton-input"></div>
+                <div class="skeleton skeleton-button"></div>
+            </div>
+        </div>
+
+        <div class="skeleton-view sk-landing">
+            <div class="skeleton skeleton-badge"></div>
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-title short"></div>
+            <div class="skeleton skeleton-bar"></div>
+            <div class="skeleton-actions">
+                <div class="skeleton skeleton-button"></div>
+                <div class="skeleton skeleton-button ghost"></div>
+            </div>
+            <div class="skeleton-grid three">
+                <div class="skeleton skeleton-stat"></div>
+                <div class="skeleton skeleton-stat"></div>
+                <div class="skeleton skeleton-stat"></div>
+            </div>
+        </div>
+
+        <div class="skeleton-view sk-cards">
+            <div class="skeleton-grid">
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar">
         <div class="nav-inner">
             <a href="{{ url_for('landing') }}" class="nav-brand">
