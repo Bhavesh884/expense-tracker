@@ -113,7 +113,7 @@ def login():
     session["user_id"] = user["id"]
     session["user_name"] = user["name"]
     flash(f"Welcome back, {user['name']}!", "success")
-    return redirect(url_for("landing"))
+    return redirect(url_for("profile"))
 
 
 @app.route("/logout")
@@ -130,7 +130,50 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    # Step 05 is UI-first: the page is driven by hardcoded sample data so the
+    # layout can be validated before real queries are wired in a later step.
+    user = {
+        "name": session.get("user_name", "Demo User"),
+        "email": "demo@spendly.com",
+        "initials": "DU",
+        "member_since": "July 2026",
+    }
+
+    summary = {
+        "total_spent": "295.25",
+        "transaction_count": 8,
+        "top_category": "Bills",
+    }
+
+    transactions = [
+        {"date": "2026-07-21", "description": "Groceries", "category": "Food", "amount": "22.75"},
+        {"date": "2026-07-18", "description": "Misc", "category": "Other", "amount": "15.00"},
+        {"date": "2026-07-15", "description": "T-shirt", "category": "Shopping", "amount": "60.00"},
+        {"date": "2026-07-12", "description": "Cinema", "category": "Entertainment", "amount": "30.00"},
+        {"date": "2026-07-09", "description": "Pharmacy", "category": "Health", "amount": "25.00"},
+        {"date": "2026-07-06", "description": "Electricity", "category": "Bills", "amount": "90.00"},
+        {"date": "2026-07-04", "description": "Monthly metro pass", "category": "Transport", "amount": "40.00"},
+        {"date": "2026-07-02", "description": "Lunch", "category": "Food", "amount": "12.50"},
+    ]
+
+    breakdown = [
+        {"category": "Bills", "amount": "90.00", "width": "profile-bar-fill--w1"},
+        {"category": "Shopping", "amount": "60.00", "width": "profile-bar-fill--w2"},
+        {"category": "Transport", "amount": "40.00", "width": "profile-bar-fill--w3"},
+        {"category": "Food", "amount": "35.25", "width": "profile-bar-fill--w4"},
+        {"category": "Entertainment", "amount": "30.00", "width": "profile-bar-fill--w5"},
+    ]
+
+    return render_template(
+        "profile.html",
+        user=user,
+        summary=summary,
+        transactions=transactions,
+        breakdown=breakdown,
+    )
 
 
 @app.route("/expenses/add")
