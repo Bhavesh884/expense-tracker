@@ -15,17 +15,18 @@
         {% endif %}
         {% endwith %}
 
-        <!-- 1. User info card -->
-        <div class="profile-card profile-user">
+        <!-- Hero band: identity -->
+        <div class="profile-hero">
             <div class="profile-avatar" aria-hidden="true">{{ user.initials }}</div>
-            <div class="profile-user-meta">
+            <div class="profile-hero-meta">
+                <span class="profile-eyebrow">Your account</span>
                 <h1 class="profile-name">{{ user.name }}</h1>
                 <p class="profile-email">{{ user.email }}</p>
                 <p class="profile-since">Member since {{ user.member_since }}</p>
             </div>
         </div>
 
-        <!-- 2. Summary stats row -->
+        <!-- Summary stats -->
         <div class="profile-stats">
             <div class="profile-stat">
                 <span class="profile-stat-label">Total spent</span>
@@ -41,52 +42,74 @@
             </div>
         </div>
 
-        <!-- 3. Transaction history table -->
-        <div class="profile-card">
-            <h2 class="profile-section-title">Recent transactions</h2>
-            <div class="profile-table-wrap">
-                <table class="profile-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th class="profile-amount">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for tx in transactions %}
-                        <tr>
-                            <td class="profile-date">{{ tx.date }}</td>
-                            <td>{{ tx.description }}</td>
-                            <td>
-                                <span class="cat-badge cat-{{ tx.category|lower }}">{{ tx.category }}</span>
-                            </td>
-                            <td class="profile-amount">₹{{ tx.amount }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <!-- Dashboard grid: transactions + breakdown -->
+        <div class="profile-grid">
 
-        <!-- 4. Category breakdown -->
-        <div class="profile-card">
-            <h2 class="profile-section-title">Category breakdown</h2>
-            <div class="profile-breakdown">
-                {% for c in breakdown %}
-                <div class="profile-bar-row">
-                    <span class="profile-bar-cat">
-                        <span class="cat-dot cat-{{ c.category|lower }}" aria-hidden="true"></span>
-                        {{ c.category }}
-                    </span>
-                    <div class="profile-bar-track">
-                        <div class="profile-bar-fill cat-{{ c.category|lower }} {{ c.width }}"></div>
-                    </div>
-                    <span class="profile-bar-amt">₹{{ c.amount }}</span>
+            <!-- Transaction history -->
+            <div class="profile-card">
+                <h2 class="profile-section-title">Recent transactions</h2>
+                {% if transactions %}
+                <div class="profile-table-wrap">
+                    <table class="profile-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th class="profile-amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                            <tr>
+                                <td class="profile-date">{{ tx.date }}</td>
+                                <td>{{ tx.description }}</td>
+                                <td>
+                                    <span class="cat-badge cat-{{ tx.category|lower }}">{{ tx.category }}</span>
+                                </td>
+                                <td class="profile-amount">₹{{ tx.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                {% endfor %}
+                {% else %}
+                <div class="profile-empty">
+                    <p class="profile-empty-title">No transactions yet</p>
+                    <p class="profile-empty-text">Your recent expenses will show up here once you start tracking.</p>
+                </div>
+                {% endif %}
             </div>
+
+            <!-- Category breakdown -->
+            <div class="profile-card">
+                <h2 class="profile-section-title">Category breakdown</h2>
+                {% if breakdown %}
+                <div class="profile-breakdown">
+                    {% for c in breakdown %}
+                    <div class="profile-bar-row">
+                        <div class="profile-bar-head">
+                            <span class="profile-bar-cat">
+                                <span class="cat-dot cat-{{ c.category|lower }}" aria-hidden="true"></span>
+                                {{ c.category }}
+                            </span>
+                            <span class="profile-bar-amt">₹{{ c.amount }}</span>
+                        </div>
+                        <div class="profile-bar-track">
+                            <div class="profile-bar-fill cat-{{ c.category|lower }} {{ c.width_class }}"></div>
+                        </div>
+                        <span class="profile-bar-pct">{{ c.pct }}% of spend</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="profile-empty">
+                    <p class="profile-empty-title">Nothing to break down</p>
+                    <p class="profile-empty-text">Add expenses to see where your money goes.</p>
+                </div>
+                {% endif %}
+            </div>
+
         </div>
 
     </div>

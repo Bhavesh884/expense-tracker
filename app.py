@@ -1,11 +1,21 @@
 import os
 import re
 import sqlite3
+from datetime import datetime
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from database.db import create_user, get_user_by_email, init_db, seed_db
+from database.db import (
+    create_user,
+    get_category_breakdown,
+    get_recent_transactions,
+    get_summary_stats,
+    get_user_by_email,
+    get_user_by_id,
+    init_db,
+    seed_db,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
@@ -19,6 +29,21 @@ def is_strong_password(password):
         and re.search(r"[A-Z]", password)
         and re.search(r"[^A-Za-z0-9]", password)
     )
+
+
+def build_initials(name):
+    """Return up to two uppercase initials from a name, or '?' if unavailable."""
+    parts = (name or "").split()
+    initials = "".join(part[0] for part in parts[:2])
+    return initials.upper() or "?"
+
+
+def format_member_since(created_at):
+    """Format a users.created_at timestamp as 'Month YYYY', or '—' if unparseable."""
+    try:
+        return datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").strftime("%B %Y")
+    except (TypeError, ValueError):
+        return "—"
 
 with app.app_context():
     init_db()
@@ -130,41 +155,47 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    if not session.get("user_id"):
+    user_id = session.get("user_id")
+    if not user_id:
         return redirect(url_for("login"))
 
-    # Step 05 is UI-first: the page is driven by hardcoded sample data so the
-    # layout can be validated before real queries are wired in a later step.
+    account = get_user_by_id(user_id)
+    if account is None:
+        session.clear()
+        return redirect(url_for("login"))
+
     user = {
-        "name": session.get("user_name", "Demo User"),
-        "email": "demo@spendly.com",
-        "initials": "DU",
-        "member_since": "July 2026",
+        "name": account["name"],
+        "email": account["email"],
+        "initials": build_initials(account["name"]),
+        "member_since": format_member_since(account["created_at"]),
     }
 
+    stats = get_summary_stats(user_id)
     summary = {
-        "total_spent": "295.25",
-        "transaction_count": 8,
-        "top_category": "Bills",
+        "total_spent": "{:,.2f}".format(stats["total_spent"]),
+        "transaction_count": stats["transaction_count"],
+        "top_category": stats["top_category"],
     }
 
     transactions = [
-        {"date": "2026-07-21", "description": "Groceries", "category": "Food", "amount": "22.75"},
-        {"date": "2026-07-18", "description": "Misc", "category": "Other", "amount": "15.00"},
-        {"date": "2026-07-15", "description": "T-shirt", "category": "Shopping", "amount": "60.00"},
-        {"date": "2026-07-12", "description": "Cinema", "category": "Entertainment", "amount": "30.00"},
-        {"date": "2026-07-09", "description": "Pharmacy", "category": "Health", "amount": "25.00"},
-        {"date": "2026-07-06", "description": "Electricity", "category": "Bills", "amount": "90.00"},
-        {"date": "2026-07-04", "description": "Monthly metro pass", "category": "Transport", "amount": "40.00"},
-        {"date": "2026-07-02", "description": "Lunch", "category": "Food", "amount": "12.50"},
+        {
+            "date": t["date"],
+            "description": t["description"],
+            "category": t["category"],
+            "amount": "{:,.2f}".format(t["amount"]),
+        }
+        for t in get_recent_transactions(user_id)
     ]
 
     breakdown = [
-        {"category": "Bills", "amount": "90.00", "width": "profile-bar-fill--w1"},
-        {"category": "Shopping", "amount": "60.00", "width": "profile-bar-fill--w2"},
-        {"category": "Transport", "amount": "40.00", "width": "profile-bar-fill--w3"},
-        {"category": "Food", "amount": "35.25", "width": "profile-bar-fill--w4"},
-        {"category": "Entertainment", "amount": "30.00", "width": "profile-bar-fill--w5"},
+        {
+            "category": c["category"],
+            "amount": "{:,.2f}".format(c["amount"]),
+            "pct": c["pct"],
+            "width_class": "bar-w" + str(round(c["pct"] / 5) * 5),
+        }
+        for c in get_category_breakdown(user_id)
     ]
 
     return render_template(

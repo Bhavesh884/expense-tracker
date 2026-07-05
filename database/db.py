@@ -72,6 +72,101 @@ def create_user(name, email, password_hash):
     return user_id
 
 
+def get_user_by_id(user_id):
+    """Return the user row matching the id, or None if it does not exist."""
+    conn = get_db()
+    user = conn.execute(
+        "SELECT * FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+    conn.close()
+    return user
+
+
+def get_summary_stats(user_id):
+    """Return spending summary for a user: total spent, transaction count, top category."""
+    conn = get_db()
+
+    total_row = conn.execute(
+        "SELECT COALESCE(SUM(amount), 0), COUNT(*) FROM expenses WHERE user_id = ?",
+        (user_id,),
+    ).fetchone()
+
+    category_row = conn.execute(
+        "SELECT category FROM expenses WHERE user_id = ? "
+        "GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1",
+        (user_id,),
+    ).fetchone()
+
+    conn.close()
+
+    transaction_count = total_row[1]
+    if transaction_count == 0:
+        return {"total_spent": 0, "transaction_count": 0, "top_category": "—"}
+
+    top_category = category_row[0] if category_row is not None else "—"
+
+    return {
+        "total_spent": float(total_row[0]),
+        "transaction_count": transaction_count,
+        "top_category": top_category,
+    }
+
+
+def get_recent_transactions(user_id, limit=10):
+    """Return the user's most recent expenses, newest first, capped at `limit`."""
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT date, description, category, amount "
+        "FROM expenses "
+        "WHERE user_id = ? "
+        "ORDER BY date DESC, id DESC "
+        "LIMIT ?",
+        (user_id, limit),
+    ).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_category_breakdown(user_id):
+    """Return per-category spend totals for a user with integer percentages summing to 100."""
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT category, SUM(amount) AS total "
+        "FROM expenses WHERE user_id = ? "
+        "GROUP BY category ORDER BY total DESC",
+        (user_id,),
+    ).fetchall()
+    conn.close()
+
+    if not rows:
+        return []
+
+    grand_total = sum(row["total"] for row in rows)
+    if grand_total == 0:
+        return []
+
+    breakdown = []
+    for row in rows:
+        raw_pct = (row["total"] / grand_total) * 100
+        breakdown.append(
+            {
+                "category": row["category"],
+                "amount": float(row["total"]),
+                "pct": int(raw_pct),
+                "remainder": raw_pct - int(raw_pct),
+            }
+        )
+
+    leftover = 100 - sum(item["pct"] for item in breakdown)
+    for item in sorted(breakdown, key=lambda x: x["remainder"], reverse=True)[:leftover]:
+        item["pct"] += 1
+
+    return [
+        {"category": item["category"], "amount": item["amount"], "pct": item["pct"]}
+        for item in breakdown
+    ]
+
+
 def seed_db():
     """Insert one demo user and eight sample expenses, only if the DB is empty."""
     conn = get_db()
