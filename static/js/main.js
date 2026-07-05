@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initLoader();
     initPasswordToggles();
     initPasswordUX();
+    initAllTransactions();
 });
 
 
@@ -188,4 +189,39 @@ function initPasswordUX() {
 
     // Start disabled until the user enters a strong, matching password.
     update();
+}
+
+
+// ------------------------------------------------------------------ //
+// All transactions section                                            //
+// Reveals the full, paginated transaction list on the profile page.   //
+// Filtering and pagination reload the page (server-rendered) and link //
+// back to #all-transactions, so the section reopens automatically.    //
+// ------------------------------------------------------------------ //
+function initAllTransactions() {
+    var toggle = document.getElementById("all-tx-toggle");
+    var body = document.getElementById("all-tx-body");
+    var section = document.getElementById("all-transactions");
+    if (!toggle || !body || !section) {
+        return;
+    }
+
+    function setOpen(open) {
+        body.hidden = !open;
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        toggle.textContent = open ? "Hide transactions" : "View all transactions";
+    }
+
+    toggle.addEventListener("click", function () {
+        var willOpen = body.hidden;
+        setOpen(willOpen);
+        if (willOpen) {
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    });
+
+    // Reopen when arriving via a filter/pagination link (#all-transactions).
+    if (window.location.hash === "#all-transactions") {
+        setOpen(true);
+    }
 }

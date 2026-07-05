@@ -1,3 +1,4 @@
+import math
 import os
 import re
 import sqlite3
@@ -7,10 +8,12 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from database.db import (
+    count_transactions,
     create_user,
     get_category_breakdown,
     get_recent_transactions,
     get_summary_stats,
+    get_transactions_page,
     get_user_by_email,
     get_user_by_id,
     init_db,
@@ -19,6 +22,9 @@ from database.db import (
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+
+# Number of expenses shown per page in the "All transactions" section.
+TRANSACTIONS_PER_PAGE = 8
 
 
 def is_strong_password(password):
@@ -44,6 +50,16 @@ def format_member_since(created_at):
         return datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").strftime("%B %Y")
     except (TypeError, ValueError):
         return "—"
+
+
+def parse_date_arg(value):
+    """Return a 'YYYY-MM-DD' date string if valid, else None."""
+    value = (value or "").strip()
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+        return value
+    except ValueError:
+        return None
 
 with app.app_context():
     init_db()
@@ -198,12 +214,60 @@ def profile():
         for c in get_category_breakdown(user_id)
     ]
 
+    # "All transactions" section: optional date-range filter + pagination.
+    start_date = parse_date_arg(request.args.get("start"))
+    end_date = parse_date_arg(request.args.get("end"))
+
+    total = count_transactions(user_id, start_date, end_date)
+    total_pages = max(1, math.ceil(total / TRANSACTIONS_PER_PAGE))
+
+    try:
+        page = int(request.args.get("page", 1))
+    except (TypeError, ValueError):
+        page = 1
+    page = max(1, min(page, total_pages))
+
+    offset = (page - 1) * TRANSACTIONS_PER_PAGE
+    all_transactions = [
+        {
+            "id": t["id"],
+            "date": t["date"],
+            "description": t["description"],
+            "category": t["category"],
+            "amount": "{:,.2f}".format(t["amount"]),
+        }
+        for t in get_transactions_page(
+            user_id, TRANSACTIONS_PER_PAGE, offset, start_date, end_date
+        )
+    ]
+
+    pagination = {
+        "page": page,
+        "total_pages": total_pages,
+        "total": total,
+        "has_prev": page > 1,
+        "has_next": page < total_pages,
+        "prev_page": page - 1,
+        "next_page": page + 1,
+    }
+
+    filters = {"start": start_date or "", "end": end_date or ""}
+
+    all_tx_open = any(
+        request.args.get(key) is not None
+        for key in ("open", "page", "start", "end")
+    )
+
     return render_template(
         "profile.html",
         user=user,
         summary=summary,
         transactions=transactions,
         breakdown=breakdown,
+        all_transactions=all_transactions,
+        pagination=pagination,
+        filters=filters,
+        all_tx_open=all_tx_open,
     )
 
 

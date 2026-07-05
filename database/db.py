@@ -127,6 +127,45 @@ def get_recent_transactions(user_id, limit=10):
     return [dict(row) for row in rows]
 
 
+def _build_expense_filters(user_id, start_date=None, end_date=None):
+    """Return a (where_clause, params) pair filtering a user's expenses by date range."""
+    clauses = ["user_id = ?"]
+    params = [user_id]
+    if start_date:
+        clauses.append("date >= ?")
+        params.append(start_date)
+    if end_date:
+        clauses.append("date <= ?")
+        params.append(end_date)
+    return " AND ".join(clauses), params
+
+
+def count_transactions(user_id, start_date=None, end_date=None):
+    """Return the number of a user's expenses, optionally within a date range."""
+    where, params = _build_expense_filters(user_id, start_date, end_date)
+    conn = get_db()
+    total = conn.execute(
+        "SELECT COUNT(*) FROM expenses WHERE " + where, params
+    ).fetchone()[0]
+    conn.close()
+    return total
+
+
+def get_transactions_page(user_id, limit, offset, start_date=None, end_date=None):
+    """Return one page of a user's expenses, newest first, optionally within a date range."""
+    where, params = _build_expense_filters(user_id, start_date, end_date)
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT id, date, description, category, amount "
+        "FROM expenses WHERE " + where + " "
+        "ORDER BY date DESC, id DESC "
+        "LIMIT ? OFFSET ?",
+        params + [limit, offset],
+    ).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
 def get_category_breakdown(user_id):
     """Return per-category spend totals for a user with integer percentages summing to 100."""
     conn = get_db()

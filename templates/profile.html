@@ -112,6 +112,89 @@
 
         </div>
 
+        <!-- All transactions: toggleable, filterable, paginated -->
+        <div class="profile-card" id="all-transactions">
+            <div class="profile-card-head">
+                <h2 class="profile-section-title">All transactions</h2>
+                <button type="button" class="btn-primary" id="all-tx-toggle" data-no-loader
+                        aria-expanded="{{ 'true' if all_tx_open else 'false' }}"
+                        aria-controls="all-tx-body">
+                    {{ 'Hide transactions' if all_tx_open else 'View all transactions' }}
+                </button>
+            </div>
+
+            <div class="all-tx-body" id="all-tx-body"{{ '' if all_tx_open else ' hidden' }}>
+
+                <form class="tx-filter" method="get" action="{{ url_for('profile') }}#all-transactions">
+                    <input type="hidden" name="open" value="1">
+                    <div class="tx-filter-field">
+                        <label for="tx-start">From</label>
+                        <input class="form-input" type="date" id="tx-start" name="start" value="{{ filters.start }}">
+                    </div>
+                    <div class="tx-filter-field">
+                        <label for="tx-end">To</label>
+                        <input class="form-input" type="date" id="tx-end" name="end" value="{{ filters.end }}">
+                    </div>
+                    <div class="tx-filter-actions">
+                        <button type="submit" class="btn-primary">Apply</button>
+                        <a class="btn-ghost" href="{{ url_for('profile', open=1) }}#all-transactions">Clear</a>
+                    </div>
+                </form>
+
+                {% if all_transactions %}
+                <div class="profile-table-wrap">
+                    <table class="profile-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th class="profile-amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in all_transactions %}
+                            <tr>
+                                <td class="profile-date">{{ tx.date }}</td>
+                                <td>{{ tx.description }}</td>
+                                <td>
+                                    <span class="cat-badge cat-{{ tx.category|lower }}">{{ tx.category }}</span>
+                                </td>
+                                <td class="profile-amount">₹{{ tx.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tx-pagination">
+                    <span class="tx-pagination-info">
+                        Page {{ pagination.page }} of {{ pagination.total_pages }}
+                        · {{ pagination.total }} transaction{{ '' if pagination.total == 1 else 's' }}
+                    </span>
+                    <div class="tx-pagination-actions">
+                        {% if pagination.has_prev %}
+                        <a class="btn-ghost" href="{{ url_for('profile', page=pagination.prev_page, start=filters.start, end=filters.end) }}#all-transactions">Previous</a>
+                        {% else %}
+                        <span class="btn-ghost is-disabled" aria-disabled="true">Previous</span>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                        <a class="btn-ghost" href="{{ url_for('profile', page=pagination.next_page, start=filters.start, end=filters.end) }}#all-transactions">Next</a>
+                        {% else %}
+                        <span class="btn-ghost is-disabled" aria-disabled="true">Next</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="profile-empty">
+                    <p class="profile-empty-title">No transactions found</p>
+                    <p class="profile-empty-text">Try widening your date range to see more expenses.</p>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
     </div>
 </section>
 
