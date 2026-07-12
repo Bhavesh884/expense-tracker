@@ -1161,6 +1161,13 @@ a { color: inherit; text-decoration: none; }
     margin-top: 0.4rem;
 }
 
+/* Primary actions -------------------------------------------------- */
+
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* Summary stats ---------------------------------------------------- */
 
 .profile-stats {
@@ -1391,6 +1398,10 @@ a { color: inherit; text-decoration: none; }
 .profile-empty-text {
     font-size: 0.9rem;
     color: var(--ink-muted);
+}
+
+.profile-empty .btn-primary {
+    margin-top: 1.25rem;
 }
 
 /* All transactions section ----------------------------------------- */

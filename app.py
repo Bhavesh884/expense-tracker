@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from database.db import (
     count_transactions,
+    create_expense,
     create_user,
     get_category_breakdown,
     get_recent_transactions,
@@ -72,6 +73,15 @@ def parse_date_arg(value):
         return value
     except ValueError:
         return None
+
+
+def parse_amount(value):
+    """Return a positive float from the input, or None if invalid."""
+    try:
+        amount = float((value or "").strip())
+    except ValueError:
+        return None
+    return amount if amount > 0 else None
 
 
 def build_preset_ranges(today):
@@ -334,9 +344,62 @@ def profile():
     )
 
 
-@app.route("/expenses/add")
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    today = datetime.now().date().isoformat()
+
+    if request.method == "GET":
+        return render_template(
+            "add_expense.html",
+            categories=EXPENSE_CATEGORIES,
+            values={"amount": "", "category": "", "date": today, "description": ""},
+        )
+
+    amount_raw = request.form.get("amount", "").strip()
+    category = request.form.get("category", "").strip()
+    date = request.form.get("date", "").strip()
+    description = request.form.get("description", "").strip()
+
+    values = {
+        "amount": amount_raw,
+        "category": category,
+        "date": date,
+        "description": description,
+    }
+
+    amount = parse_amount(amount_raw)
+    if amount is None:
+        return render_template(
+            "add_expense.html",
+            categories=EXPENSE_CATEGORIES,
+            values=values,
+            error="Enter an amount greater than 0.",
+        )
+
+    if category not in EXPENSE_CATEGORIES:
+        return render_template(
+            "add_expense.html",
+            categories=EXPENSE_CATEGORIES,
+            values=values,
+            error="Choose a category from the list.",
+        )
+
+    if parse_date_arg(date) is None:
+        return render_template(
+            "add_expense.html",
+            categories=EXPENSE_CATEGORIES,
+            values=values,
+            error="Enter a valid date.",
+        )
+
+    create_expense(user_id, amount, category, date, description or None)
+
+    flash("Expense added successfully.", "success")
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/<int:id>/edit")

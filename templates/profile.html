@@ -26,6 +26,11 @@
             </div>
         </div>
 
+        <!-- Primary actions -->
+        <div class="profile-actions">
+            <a class="btn-primary" href="{{ url_for('add_expense') }}">Add expense</a>
+        </div>
+
         <!-- Summary stats -->
         <div class="profile-stats">
             <div class="profile-stat">
@@ -106,6 +111,7 @@
                 <div class="profile-empty">
                     <p class="profile-empty-title">Nothing to break down</p>
                     <p class="profile-empty-text">Add expenses to see where your money goes.</p>
+                    <a class="btn-primary" href="{{ url_for('add_expense') }}">Add expense</a>
                 </div>
                 {% endif %}
             </div>
