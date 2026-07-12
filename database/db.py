@@ -127,8 +127,8 @@ def get_recent_transactions(user_id, limit=10):
     return [dict(row) for row in rows]
 
 
-def _build_expense_filters(user_id, start_date=None, end_date=None):
-    """Return a (where_clause, params) pair filtering a user's expenses by date range."""
+def _build_expense_filters(user_id, start_date=None, end_date=None, category=None):
+    """Return a (where_clause, params) pair filtering a user's expenses by date range and category."""
     clauses = ["user_id = ?"]
     params = [user_id]
     if start_date:
@@ -137,12 +137,15 @@ def _build_expense_filters(user_id, start_date=None, end_date=None):
     if end_date:
         clauses.append("date <= ?")
         params.append(end_date)
+    if category:
+        clauses.append("category = ?")
+        params.append(category)
     return " AND ".join(clauses), params
 
 
-def count_transactions(user_id, start_date=None, end_date=None):
-    """Return the number of a user's expenses, optionally within a date range."""
-    where, params = _build_expense_filters(user_id, start_date, end_date)
+def count_transactions(user_id, start_date=None, end_date=None, category=None):
+    """Return the number of a user's expenses, optionally within a date range and category."""
+    where, params = _build_expense_filters(user_id, start_date, end_date, category)
     conn = get_db()
     total = conn.execute(
         "SELECT COUNT(*) FROM expenses WHERE " + where, params
@@ -151,9 +154,9 @@ def count_transactions(user_id, start_date=None, end_date=None):
     return total
 
 
-def get_transactions_page(user_id, limit, offset, start_date=None, end_date=None):
-    """Return one page of a user's expenses, newest first, optionally within a date range."""
-    where, params = _build_expense_filters(user_id, start_date, end_date)
+def get_transactions_page(user_id, limit, offset, start_date=None, end_date=None, category=None):
+    """Return one page of a user's expenses, newest first, optionally within a date range and category."""
+    where, params = _build_expense_filters(user_id, start_date, end_date, category)
     conn = get_db()
     rows = conn.execute(
         "SELECT id, date, description, category, amount "
