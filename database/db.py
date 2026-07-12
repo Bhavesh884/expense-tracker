@@ -72,6 +72,20 @@ def create_user(name, email, password_hash):
     return user_id
 
 
+def create_expense(user_id, amount, category, date, description):
+    """Insert an expense for a user and return the generated id."""
+    conn = get_db()
+    cursor = conn.execute(
+        "INSERT INTO expenses (user_id, amount, category, date, description) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (user_id, amount, category, date, description),
+    )
+    conn.commit()
+    expense_id = cursor.lastrowid
+    conn.close()
+    return expense_id
+
+
 def get_user_by_id(user_id):
     """Return the user row matching the id, or None if it does not exist."""
     conn = get_db()
