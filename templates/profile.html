@@ -125,6 +125,13 @@
 
             <div class="all-tx-body" id="all-tx-body"{{ '' if all_tx_open else ' hidden' }}>
 
+                <div class="tx-preset-row">
+                    <span class="tx-preset-label">Quick ranges:</span>
+                    {% for preset in presets.values() %}
+                    <a class="btn-ghost" href="{{ url_for('profile', open=1, start=preset.start, end=preset.end, category=filters.category) }}#all-transactions">{{ preset.label }}</a>
+                    {% endfor %}
+                </div>
+
                 <form class="tx-filter" method="get" action="{{ url_for('profile') }}#all-transactions">
                     <input type="hidden" name="open" value="1">
                     <div class="tx-filter-field">
@@ -135,13 +142,43 @@
                         <label for="tx-end">To</label>
                         <input class="form-input" type="date" id="tx-end" name="end" value="{{ filters.end }}">
                     </div>
+                    <div class="tx-filter-field">
+                        <label for="tx-category">Category</label>
+                        <select class="form-input" id="tx-category" name="category">
+                            <option value="">All categories</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}"{{ ' selected' if filters.category == cat else '' }}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="tx-filter-actions">
                         <button type="submit" class="btn-primary">Apply</button>
                         <a class="btn-ghost" href="{{ url_for('profile', open=1) }}#all-transactions">Clear</a>
                     </div>
                 </form>
 
-                {% if all_transactions %}
+                {% if filters.start or filters.end or filters.category %}
+                <div class="tx-filter-summary">
+                    <span>
+                        Showing
+                        {% if filters.category %}<strong>{{ filters.category }}</strong>{% else %}all categories{% endif %}
+                        {% if filters.start and filters.end %}
+                        from <strong>{{ filters.start }}</strong> to <strong>{{ filters.end }}</strong>
+                        {% elif filters.start %}
+                        from <strong>{{ filters.start }}</strong>
+                        {% elif filters.end %}
+                        up to <strong>{{ filters.end }}</strong>
+                        {% endif %}
+                    </span>
+                    <a class="tx-filter-clear" href="{{ url_for('profile', open=1) }}#all-transactions">Clear filters</a>
+                </div>
+                {% endif %}
+
+                {% if range_error %}
+                <div class="tx-filter-error" role="alert">
+                    The <strong>From</strong> date is after the <strong>To</strong> date. Swap them to see results.
+                </div>
+                {% elif all_transactions %}
                 <div class="profile-table-wrap">
                     <table class="profile-table">
                         <thead>
@@ -174,12 +211,12 @@
                     </span>
                     <div class="tx-pagination-actions">
                         {% if pagination.has_prev %}
-                        <a class="btn-ghost" href="{{ url_for('profile', page=pagination.prev_page, start=filters.start, end=filters.end) }}#all-transactions">Previous</a>
+                        <a class="btn-ghost" href="{{ url_for('profile', page=pagination.prev_page, start=filters.start, end=filters.end, category=filters.category) }}#all-transactions">Previous</a>
                         {% else %}
                         <span class="btn-ghost is-disabled" aria-disabled="true">Previous</span>
                         {% endif %}
                         {% if pagination.has_next %}
-                        <a class="btn-ghost" href="{{ url_for('profile', page=pagination.next_page, start=filters.start, end=filters.end) }}#all-transactions">Next</a>
+                        <a class="btn-ghost" href="{{ url_for('profile', page=pagination.next_page, start=filters.start, end=filters.end, category=filters.category) }}#all-transactions">Next</a>
                         {% else %}
                         <span class="btn-ghost is-disabled" aria-disabled="true">Next</span>
                         {% endif %}

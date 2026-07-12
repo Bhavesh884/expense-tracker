@@ -2,7 +2,7 @@ import math
 import os
 import re
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -25,6 +25,18 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
 # Number of expenses shown per page in the "All transactions" section.
 TRANSACTIONS_PER_PAGE = 8
+
+# The fixed set of expense categories used across the app. Any value outside
+# this allow-list is treated as "no category filter".
+EXPENSE_CATEGORIES = (
+    "Food",
+    "Transport",
+    "Bills",
+    "Health",
+    "Entertainment",
+    "Shopping",
+    "Other",
+)
 
 
 def is_strong_password(password):
@@ -60,6 +72,36 @@ def parse_date_arg(value):
         return value
     except ValueError:
         return None
+
+
+def build_preset_ranges(today):
+    """Return quick-filter date ranges as ('YYYY-MM-DD', 'YYYY-MM-DD') pairs.
+
+    Ranges cover the full period so future-dated expenses within the period are
+    still included: This month = 1st→last day, This year = Jan 1→Dec 31,
+    Last 30 days = trailing 30 days ending today.
+    """
+    first_of_month = today.replace(day=1)
+    next_month = (first_of_month + timedelta(days=32)).replace(day=1)
+    last_of_month = next_month - timedelta(days=1)
+
+    return {
+        "month": {
+            "label": "This month",
+            "start": first_of_month.isoformat(),
+            "end": last_of_month.isoformat(),
+        },
+        "days30": {
+            "label": "Last 30 days",
+            "start": (today - timedelta(days=29)).isoformat(),
+            "end": today.isoformat(),
+        },
+        "year": {
+            "label": "This year",
+            "start": today.replace(month=1, day=1).isoformat(),
+            "end": today.replace(month=12, day=31).isoformat(),
+        },
+    }
 
 with app.app_context():
     init_db()
@@ -214,11 +256,22 @@ def profile():
         for c in get_category_breakdown(user_id)
     ]
 
-    # "All transactions" section: optional date-range filter + pagination.
+    # "All transactions" section: optional date-range + category filter + pagination.
     start_date = parse_date_arg(request.args.get("start"))
     end_date = parse_date_arg(request.args.get("end"))
 
-    total = count_transactions(user_id, start_date, end_date)
+    category = request.args.get("category", "")
+    category = category if category in EXPENSE_CATEGORIES else None
+
+    # An inverted range (start after end) is a user error, not an empty result.
+    range_error = bool(start_date and end_date and start_date > end_date)
+
+    if range_error:
+        total = 0
+        all_transactions = []
+    else:
+        total = count_transactions(user_id, start_date, end_date, category)
+
     total_pages = max(1, math.ceil(total / TRANSACTIONS_PER_PAGE))
 
     try:
@@ -227,19 +280,20 @@ def profile():
         page = 1
     page = max(1, min(page, total_pages))
 
-    offset = (page - 1) * TRANSACTIONS_PER_PAGE
-    all_transactions = [
-        {
-            "id": t["id"],
-            "date": t["date"],
-            "description": t["description"],
-            "category": t["category"],
-            "amount": "{:,.2f}".format(t["amount"]),
-        }
-        for t in get_transactions_page(
-            user_id, TRANSACTIONS_PER_PAGE, offset, start_date, end_date
-        )
-    ]
+    if not range_error:
+        offset = (page - 1) * TRANSACTIONS_PER_PAGE
+        all_transactions = [
+            {
+                "id": t["id"],
+                "date": t["date"],
+                "description": t["description"],
+                "category": t["category"],
+                "amount": "{:,.2f}".format(t["amount"]),
+            }
+            for t in get_transactions_page(
+                user_id, TRANSACTIONS_PER_PAGE, offset, start_date, end_date, category
+            )
+        ]
 
     pagination = {
         "page": page,
@@ -251,11 +305,17 @@ def profile():
         "next_page": page + 1,
     }
 
-    filters = {"start": start_date or "", "end": end_date or ""}
+    filters = {
+        "start": start_date or "",
+        "end": end_date or "",
+        "category": category or "",
+    }
+
+    presets = build_preset_ranges(datetime.now().date())
 
     all_tx_open = any(
         request.args.get(key) is not None
-        for key in ("open", "page", "start", "end")
+        for key in ("open", "page", "start", "end", "category")
     )
 
     return render_template(
@@ -267,6 +327,9 @@ def profile():
         all_transactions=all_transactions,
         pagination=pagination,
         filters=filters,
+        presets=presets,
+        categories=EXPENSE_CATEGORIES,
+        range_error=range_error,
         all_tx_open=all_tx_open,
     )
 
