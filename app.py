@@ -20,6 +20,7 @@ from database.db import (
     count_transactions,
     create_expense,
     create_user,
+    delete_expense as delete_expense_row,
     get_category_breakdown,
     get_expense,
     get_recent_transactions,
@@ -368,6 +369,7 @@ def add_expense():
             "add_expense.html",
             categories=EXPENSE_CATEGORIES,
             values={"amount": "", "category": "", "date": today, "description": ""},
+            today=today,
         )
 
     amount_raw = request.form.get("amount", "").strip()
@@ -388,6 +390,7 @@ def add_expense():
             "add_expense.html",
             categories=EXPENSE_CATEGORIES,
             values=values,
+            today=today,
             error="Enter an amount greater than 0.",
         )
 
@@ -396,6 +399,7 @@ def add_expense():
             "add_expense.html",
             categories=EXPENSE_CATEGORIES,
             values=values,
+            today=today,
             error="Choose a category from the list.",
         )
 
@@ -404,7 +408,17 @@ def add_expense():
             "add_expense.html",
             categories=EXPENSE_CATEGORIES,
             values=values,
+            today=today,
             error="Enter a valid date.",
+        )
+
+    if date > today:
+        return render_template(
+            "add_expense.html",
+            categories=EXPENSE_CATEGORIES,
+            values=values,
+            today=today,
+            error="Date cannot be in the future.",
         )
 
     create_expense(user_id, amount, category, date, description or None)
@@ -423,11 +437,14 @@ def edit_expense(id):
     if expense is None:
         abort(404)
 
+    today = datetime.now().date().isoformat()
+
     if request.method == "GET":
         return render_template(
             "edit_expense.html",
             categories=EXPENSE_CATEGORIES,
             expense=expense,
+            today=today,
             values={
                 "amount": expense["amount"],
                 "category": expense["category"],
@@ -454,6 +471,7 @@ def edit_expense(id):
             categories=EXPENSE_CATEGORIES,
             expense=expense,
             values=values,
+            today=today,
             error=message,
         )
 
@@ -467,6 +485,9 @@ def edit_expense(id):
     if parse_date_arg(date) is None:
         return reject("Enter a valid date.")
 
+    if date > today:
+        return reject("Date cannot be in the future.")
+
     if update_expense(id, user_id, amount, category, date, description or None) == 0:
         abort(404)
 
@@ -474,9 +495,17 @@ def edit_expense(id):
     return redirect(url_for("profile"))
 
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
 def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    if delete_expense_row(id, user_id) == 0:
+        abort(404)
+
+    flash("Expense deleted successfully.", "success")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":
