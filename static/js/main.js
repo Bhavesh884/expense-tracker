@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initPasswordToggles();
     initPasswordUX();
     initAllTransactions();
+    initDeleteConfirm();
 });
 
 
@@ -91,7 +92,7 @@ function initLoader() {
     // Form submits -> show overlay while the server processes.
     document.addEventListener("submit", function (e) {
         var form = e.target;
-        if (!form || form.hasAttribute("data-no-loader")) {
+        if (!form || form.hasAttribute("data-no-loader") || e.defaultPrevented) {
             return;
         }
         var variant = form.getAttribute("data-loader") ||
@@ -189,6 +190,25 @@ function initPasswordUX() {
 
     // Start disabled until the user enters a strong, matching password.
     update();
+}
+
+
+// ------------------------------------------------------------------ //
+// Delete confirmation                                                  //
+// Any form with a data-confirm attribute asks for confirmation before //
+// submitting. Runs in the capture phase so a cancelled submit is      //
+// stopped before the loader overlay's submit handler sees it.         //
+// ------------------------------------------------------------------ //
+function initDeleteConfirm() {
+    document.addEventListener("submit", function (e) {
+        var form = e.target;
+        if (!form || !form.hasAttribute("data-confirm")) {
+            return;
+        }
+        if (!window.confirm(form.getAttribute("data-confirm"))) {
+            e.preventDefault();
+        }
+    }, true);
 }
 
 

@@ -207,6 +207,11 @@
                                 <td class="profile-amount">₹{{ tx.amount }}</td>
                                 <td class="profile-actions-col">
                                     <a class="btn-ghost" href="{{ url_for('edit_expense', id=tx.id) }}">Edit</a>
+                                    <form class="delete-expense-form" method="POST"
+                                          action="{{ url_for('delete_expense', id=tx.id) }}"
+                                          data-confirm="Delete this expense? This cannot be undone.">
+                                        <button type="submit" class="btn-ghost">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}

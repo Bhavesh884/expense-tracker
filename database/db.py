@@ -112,6 +112,19 @@ def update_expense(expense_id, user_id, amount, category, date, description):
     return changed
 
 
+def delete_expense(expense_id, user_id):
+    """Delete an expense owned by user_id and return the number of rows deleted."""
+    conn = get_db()
+    cursor = conn.execute(
+        "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+        (expense_id, user_id),
+    )
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+    return changed
+
+
 def get_user_by_id(user_id):
     """Return the user row matching the id, or None if it does not exist."""
     conn = get_db()
