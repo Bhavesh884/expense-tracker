@@ -8,3 +8,4 @@ __pycache__/
 .claude/plans/
 CLAUDE.MD
 .claude
+graphify-out
