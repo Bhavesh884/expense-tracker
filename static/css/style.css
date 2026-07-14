@@ -1276,6 +1276,12 @@ a { color: inherit; text-decoration: none; }
     color: var(--ink);
 }
 
+.profile-actions-col {
+    text-align: right;
+    white-space: nowrap;
+    width: 1%;
+}
+
 /* Category badges + dots ------------------------------------------- */
 
 .cat-badge {
