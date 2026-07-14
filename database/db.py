@@ -86,6 +86,32 @@ def create_expense(user_id, amount, category, date, description):
     return expense_id
 
 
+def get_expense(expense_id, user_id):
+    """Return a single expense owned by user_id as a dict, or None if not found."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT id, user_id, amount, category, date, description "
+        "FROM expenses WHERE id = ? AND user_id = ?",
+        (expense_id, user_id),
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def update_expense(expense_id, user_id, amount, category, date, description):
+    """Update an expense owned by user_id and return the number of rows changed."""
+    conn = get_db()
+    cursor = conn.execute(
+        "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? "
+        "WHERE id = ? AND user_id = ?",
+        (amount, category, date, description, expense_id, user_id),
+    )
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+    return changed
+
+
 def get_user_by_id(user_id):
     """Return the user row matching the id, or None if it does not exist."""
     conn = get_db()
